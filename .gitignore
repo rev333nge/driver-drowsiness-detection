@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# Dataset (DDD — ~41k images, downloaded locally, not versioned)
+data/
+
+# Training artifacts (checkpoints, metrics, plots)
+outputs/
+*.pt
+*.pth
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
