@@ -1,4 +1,4 @@
-# PyTorch with CUDA 12.8 — required for RTX 50-series (Blackwell, sm_120).
+# PyTorch with CUDA 12.8 - required for RTX 50-series (Blackwell, sm_120).
 # cp314 wheels confirmed available on the cu128 index for Python 3.14.
 --extra-index-url https://download.pytorch.org/whl/cu128
 torch==2.9.1+cu128
