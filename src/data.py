@@ -32,13 +32,24 @@ def subject_of(path) -> str:
     return m.group().upper() if m else Path(path).name
 
 
-def _build_transforms(image_size, horizontal_flip):
-    """Train transformacija (uz flip) i deterministicka eval transformacija."""
-    train_steps = [transforms.Resize((image_size, image_size))]
+def _build_transforms(image_size, horizontal_flip, strong_augment=False):
+    """Train transformacija (opc. jaka augmentacija) i deterministicka eval transformacija."""
+    if strong_augment:
+        # jaka augmentacija: otezava memorisanje (crop/rotacija/boja/brisanje),
+        # da model manje pamti lice a vise koristi oci/usta.
+        train_steps = [
+            transforms.RandomResizedCrop(image_size, scale=(0.7, 1.0)),
+            transforms.RandomRotation(15),
+            transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.05),
+        ]
+    else:
+        train_steps = [transforms.Resize((image_size, image_size))]
     if horizontal_flip:
         train_steps.append(transforms.RandomHorizontalFlip())
     train_steps += [transforms.ToTensor(),
                     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)]
+    if strong_augment:
+        train_steps.append(transforms.RandomErasing(p=0.25))
 
     eval_tf = transforms.Compose([
         transforms.Resize((image_size, image_size)),
@@ -50,7 +61,7 @@ def _build_transforms(image_size, horizontal_flip):
 
 def _bases(cfg: Config):
     """Dva ImageFolder-a nad istim folderom (isti redosled -> indeksi se poklapaju)."""
-    train_tf, eval_tf = _build_transforms(cfg.image_size, cfg.horizontal_flip)
+    train_tf, eval_tf = _build_transforms(cfg.image_size, cfg.horizontal_flip, cfg.strong_augment)
     train_base = datasets.ImageFolder(cfg.data_dir, transform=train_tf)
     eval_base = datasets.ImageFolder(cfg.data_dir, transform=eval_tf)
     return train_base, eval_base

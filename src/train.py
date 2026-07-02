@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import statistics
 import time
+from datetime import datetime
 
 import torch
 import torch.nn as nn
@@ -63,7 +64,8 @@ def main():
     print(f"Eksperiment: {cfg.experiment_name} | uredjaj: {device} | "
           f"AMP: {device.type == 'cuda'} | {cfg.n_folds}-fold CV")
 
-    out_dir = cfg.experiment_dir
+    # svaki run u svoj timestampovan podfolder, da ne prepise prethodni
+    out_dir = cfg.experiment_dir / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     cfg.to_yaml(out_dir / "config.yaml")
 
     folds, classes = [], None

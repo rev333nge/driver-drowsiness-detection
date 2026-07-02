@@ -58,12 +58,24 @@ def _evaluate_experiment(exp_dir, device):
     return result
 
 
+def _latest_runs(out):
+    """Najnoviji run po eksperimentu (podrzava ravan i timestampovan raspored)."""
+    runs = list(out.glob("*/cv_results.json")) + list(out.glob("*/*/cv_results.json"))
+    latest = {}
+    for p in runs:
+        name = json.loads(p.read_text(encoding="utf-8"))["experiment"]
+        mtime = p.stat().st_mtime
+        if name not in latest or mtime > latest[name][1]:
+            latest[name] = (p.parent, mtime)
+    return [latest[k][0] for k in sorted(latest)]
+
+
 def main():
     cfg = build_config()
     device = get_device(cfg.device)
     out = Path(cfg.output_dir)
 
-    exps = sorted(p.parent for p in out.glob("*/cv_results.json"))
+    exps = _latest_runs(out)
     if not exps:
         print(f"Nema cv_results.json u {out}/. Pokreni trening prvo (run_all.ps1).")
         return

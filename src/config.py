@@ -37,6 +37,7 @@ class Config:
 
     # augmentacija
     horizontal_flip: bool = True
+    strong_augment: bool = False      # RandomResizedCrop/rotacija/ColorJitter/RandomErasing
 
     # ostalo
     seed: int = 42
@@ -94,6 +95,9 @@ def build_config(argv=None) -> Config:
     parser.add_argument("--lr", type=float)
     parser.add_argument("--weight-decay", dest="weight_decay", type=float)
     parser.add_argument("--dropout", type=float)
+    parser.add_argument("--strong-augment", dest="strong_augment",
+                        action="store_true", default=None,
+                        help="Ukljuci jaku augmentaciju (crop/rotacija/boja/brisanje).")
     parser.add_argument("--seed", type=int)
     parser.add_argument("--device", choices=["cuda", "cpu"])
     parser.add_argument("--output-dir", dest="output_dir")
