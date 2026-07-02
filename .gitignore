@@ -14,6 +14,8 @@ env/
 
 # Dataset (DDD — ~41k images, downloaded locally, not versioned)
 data/
+# ROI-oko-ociju dataset (generisan sa src/crop_eyes.py, ne versionise se)
+data_eyes/
 
 # Training artifacts (checkpoints, metrics, plots)
 outputs/

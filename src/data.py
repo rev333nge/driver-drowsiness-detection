@@ -32,27 +32,34 @@ def subject_of(path) -> str:
     return m.group().upper() if m else Path(path).name
 
 
-def _build_transforms(image_size, horizontal_flip, strong_augment=False):
-    """Train transformacija (opc. jaka augmentacija) i deterministicka eval transformacija."""
+def _build_transforms(image_size, horizontal_flip, strong_augment=False, grayscale=False):
+    """Train transformacija (opc. jaka augmentacija/grayscale) i eval transformacija.
+
+    grayscale je domenska odluka (izbaci boju koze kao identitet), pa ide na oba
+    skupa. Augmentacija ide samo na train.
+    """
+    gray = [transforms.Grayscale(num_output_channels=3)] if grayscale else []
+
     if strong_augment:
-        # jaka augmentacija: otezava memorisanje (crop/rotacija/boja/brisanje),
-        # da model manje pamti lice a vise koristi oci/usta.
+        # jaka augmentacija: otezava memorisanje (crop/affine/boja/brisanje),
+        # da model manje pamti lice a vise koristi oci.
         train_steps = [
-            transforms.RandomResizedCrop(image_size, scale=(0.7, 1.0)),
-            transforms.RandomRotation(15),
-            transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.05),
+            transforms.RandomResizedCrop(image_size, scale=(0.6, 1.0)),
+            *gray,
+            transforms.RandomAffine(degrees=20, translate=(0.1, 0.1), scale=(0.9, 1.1)),
+            transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.2, hue=0.05),
         ]
     else:
-        train_steps = [transforms.Resize((image_size, image_size))]
+        train_steps = [transforms.Resize((image_size, image_size)), *gray]
     if horizontal_flip:
         train_steps.append(transforms.RandomHorizontalFlip())
     train_steps += [transforms.ToTensor(),
                     transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)]
     if strong_augment:
-        train_steps.append(transforms.RandomErasing(p=0.25))
+        train_steps.append(transforms.RandomErasing(p=0.4, scale=(0.02, 0.2)))
 
     eval_tf = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
+        transforms.Resize((image_size, image_size)), *gray,
         transforms.ToTensor(),
         transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD),
     ])
@@ -61,7 +68,8 @@ def _build_transforms(image_size, horizontal_flip, strong_augment=False):
 
 def _bases(cfg: Config):
     """Dva ImageFolder-a nad istim folderom (isti redosled -> indeksi se poklapaju)."""
-    train_tf, eval_tf = _build_transforms(cfg.image_size, cfg.horizontal_flip, cfg.strong_augment)
+    train_tf, eval_tf = _build_transforms(cfg.image_size, cfg.horizontal_flip,
+                                          cfg.strong_augment, cfg.grayscale)
     train_base = datasets.ImageFolder(cfg.data_dir, transform=train_tf)
     eval_base = datasets.ImageFolder(cfg.data_dir, transform=eval_tf)
     return train_base, eval_base

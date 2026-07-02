@@ -37,7 +37,8 @@ class Config:
 
     # augmentacija
     horizontal_flip: bool = True
-    strong_augment: bool = False      # RandomResizedCrop/rotacija/ColorJitter/RandomErasing
+    strong_augment: bool = False      # RandomResizedCrop/affine/ColorJitter/RandomErasing
+    grayscale: bool = False           # sivi tonovi (izbaci boju koze kao identitet), train+eval
 
     # ostalo
     seed: int = 42
@@ -97,7 +98,10 @@ def build_config(argv=None) -> Config:
     parser.add_argument("--dropout", type=float)
     parser.add_argument("--strong-augment", dest="strong_augment",
                         action="store_true", default=None,
-                        help="Ukljuci jaku augmentaciju (crop/rotacija/boja/brisanje).")
+                        help="Ukljuci jaku augmentaciju (crop/affine/boja/brisanje).")
+    parser.add_argument("--grayscale", dest="grayscale",
+                        action="store_true", default=None,
+                        help="Sivi tonovi na ulazu (train i eval).")
     parser.add_argument("--seed", type=int)
     parser.add_argument("--device", choices=["cuda", "cpu"])
     parser.add_argument("--output-dir", dest="output_dir")
