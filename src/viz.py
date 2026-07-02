@@ -9,6 +9,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import seaborn as sns  # noqa: E402
 from PIL import Image  # noqa: E402
 
 
@@ -52,6 +53,23 @@ def plot_sample_images(data_dir, class_names, save_path, per_class=8, seed=42):
             if c == 0:
                 ax.set_ylabel(cls, fontsize=11)
     fig.suptitle("Primeri slika po klasama")
+    fig.tight_layout()
+    fig.savefig(save_path, dpi=150)
+    plt.close(fig)
+    return save_path
+
+
+def plot_confusion_matrix(cm, class_names, save_path, title="Confusion matrix"):
+    """Seaborn heatmap confusion matrice (redovi = stvarno, kolone = predvidjeno)."""
+    save_path = Path(save_path)
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+
+    fig, ax = plt.subplots(figsize=(5, 4))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False,
+                xticklabels=class_names, yticklabels=class_names, ax=ax)
+    ax.set_xlabel("Predvidjeno")
+    ax.set_ylabel("Stvarno")
+    ax.set_title(title)
     fig.tight_layout()
     fig.savefig(save_path, dpi=150)
     plt.close(fig)
