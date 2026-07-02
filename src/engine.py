@@ -43,6 +43,22 @@ def evaluate(model, loader, criterion, device):
     return total_loss / n, correct / n
 
 
+@torch.no_grad()
+def evaluate_collect(model, loader, criterion, device):
+    """Jedan prolaz kroz skup: vrati (loss, acc, y_true, y_pred). Za finalni test."""
+    model.eval()
+    total_loss, n, y_true, y_pred = 0.0, 0, [], []
+    for images, labels in loader:
+        images, labels = images.to(device), labels.to(device)
+        outputs = model(images)
+        total_loss += criterion(outputs, labels).item() * images.size(0)
+        y_true.extend(labels.cpu().tolist())
+        y_pred.extend(outputs.argmax(1).cpu().tolist())
+        n += images.size(0)
+    acc = sum(int(a == b) for a, b in zip(y_true, y_pred)) / n
+    return total_loss / n, acc, y_true, y_pred
+
+
 class EarlyStopping:
     """Prati validacioni loss; staje ako nema poboljsanja `patience` epoha."""
 

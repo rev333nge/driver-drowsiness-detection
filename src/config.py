@@ -20,6 +20,7 @@ class Config:
     image_size: int = 224
     val_split: float = 0.15
     test_split: float = 0.15
+    n_folds: int = 5                  # GroupKFold po osobi (subject-wise CV)
     batch_size: int = 64
     num_workers: int = 8
 
@@ -88,6 +89,7 @@ def build_config(argv=None) -> Config:
     parser.add_argument("--image-size", dest="image_size", type=int)
     parser.add_argument("--batch-size", dest="batch_size", type=int)
     parser.add_argument("--num-workers", dest="num_workers", type=int)
+    parser.add_argument("--n-folds", dest="n_folds", type=int)
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--lr", type=float)
     parser.add_argument("--weight-decay", dest="weight_decay", type=float)
