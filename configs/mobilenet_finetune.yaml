@@ -1,0 +1,4 @@
+# MobileNetV2, finetune (odmrznut poslednji blok + glava) -> manji lr
+model: mobilenet
+mode: finetune
+lr: 0.0001

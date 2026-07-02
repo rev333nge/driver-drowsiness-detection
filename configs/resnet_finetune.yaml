@@ -1,0 +1,4 @@
+# ResNet50, finetune (odmrznut layer4 + glava) -> manji lr
+model: resnet
+mode: finetune
+lr: 0.0001

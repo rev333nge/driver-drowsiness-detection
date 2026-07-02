@@ -1,0 +1,4 @@
+# ResNet50, backbone zamrznut (trenira se samo glava)
+model: resnet
+mode: frozen
+lr: 0.001
