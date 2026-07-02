@@ -5,7 +5,6 @@
 
 from __future__ import annotations
 
-import copy
 import statistics
 import time
 from datetime import datetime
@@ -61,8 +60,9 @@ def main():
     set_seed(cfg.seed)
     device = get_device(cfg.device)
     torch.backends.cudnn.benchmark = True
+    split = "PER-IMAGE (curenje!)" if cfg.leaky_split else "subject-wise"
     print(f"Eksperiment: {cfg.experiment_name} | uredjaj: {device} | "
-          f"AMP: {device.type == 'cuda'} | {cfg.n_folds}-fold CV")
+          f"AMP: {device.type == 'cuda'} | {cfg.n_folds}-fold CV | podela: {split}")
 
     # svaki run u svoj timestampovan podfolder, da ne prepise prethodni
     out_dir = cfg.experiment_dir / datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

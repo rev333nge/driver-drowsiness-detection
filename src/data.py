@@ -2,9 +2,8 @@
 
 Osoba je kodirana u imenu fajla (A0001.png -> osoba A; malo/veliko slovo
 razlikuje klase ali oznacava istu osobu). Sve slike jedne osobe idu u isti
-skup, pa model uvek testira na osobama koje nije video:
-- subject_split: jedan train/val/test (osobe disjunktne)
-- cv_folds:      GroupKFold po osobi za k-fold cross-validaciju
+skup, pa model uvek testira na osobama koje nije video (cv_folds: subject-wise
+k-fold; leaky=True daje per-image podelu samo za demonstraciju curenja).
 
 Pokreni proveru splita i EDA grafike:
     python -m src.data
@@ -15,7 +14,8 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from sklearn.model_selection import GroupShuffleSplit, StratifiedGroupKFold
+from sklearn.model_selection import (GroupShuffleSplit, StratifiedGroupKFold,
+                                     StratifiedKFold, train_test_split)
 from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 
@@ -80,33 +80,29 @@ def _subjects(base):
     return [subject_of(p) for p, _ in base.samples]
 
 
-def subject_split(targets, subjects, val_split, test_split, seed):
-    """Jedan subject-wise train/val/test (osobe disjunktne izmedju skupova)."""
-    idx = list(range(len(targets)))
-    gss1 = GroupShuffleSplit(n_splits=1, test_size=val_split + test_split, random_state=seed)
-    tr_rel, tmp_rel = next(gss1.split(idx, targets, subjects))
-    train_idx = [idx[i] for i in tr_rel]
-    tmp_idx = [idx[i] for i in tmp_rel]
+def cv_folds(targets, subjects, n_folds, seed, leaky=False):
+    """Lista (trainval_idx, test_idx) po foldu.
 
-    tmp_sub = [subjects[i] for i in tmp_idx]
-    tmp_tgt = [targets[i] for i in tmp_idx]
-    rel_test = test_split / (val_split + test_split)
-    gss2 = GroupShuffleSplit(n_splits=1, test_size=rel_test, random_state=seed)
-    val_rel, te_rel = next(gss2.split(tmp_idx, tmp_tgt, tmp_sub))
-    return train_idx, [tmp_idx[i] for i in val_rel], [tmp_idx[i] for i in te_rel]
-
-
-def cv_folds(targets, subjects, n_folds, seed):
-    """Lista (trainval_idx, test_idx) po foldu; svaka osoba je u test tacno jednom."""
+    Podrazumevano subject-wise (svaka osoba u test tacno jednom). Uz leaky=True
+    ide nasumicna per-image podela (ignorise osobu) - iste osobe cure u train i
+    test; sluzi samo da se demonstrira naduvani accuracy zbog curenja.
+    """
+    if leaky:
+        skf = StratifiedKFold(n_splits=n_folds, shuffle=True, random_state=seed)
+        return [(list(tv), list(te)) for tv, te in skf.split(range(len(targets)), targets)]
     sgkf = StratifiedGroupKFold(n_splits=n_folds, shuffle=True, random_state=seed)
     return [(list(tv), list(te)) for tv, te in
             sgkf.split(range(len(targets)), targets, subjects)]
 
 
-def _val_from_trainval(trainval_idx, targets, subjects, val_split, seed):
-    """Subject-wise izdvoji val iz trainval osoba (za early stopping)."""
-    sub = [subjects[i] for i in trainval_idx]
+def _val_from_trainval(trainval_idx, targets, subjects, val_split, seed, leaky=False):
+    """Izdvoji val iz trainval (za early stopping); subject-wise ili per-image (leaky)."""
     tgt = [targets[i] for i in trainval_idx]
+    if leaky:
+        tr_rel, val_rel = train_test_split(range(len(trainval_idx)), test_size=val_split,
+                                           random_state=seed, stratify=tgt)
+        return [trainval_idx[i] for i in tr_rel], [trainval_idx[i] for i in val_rel]
+    sub = [subjects[i] for i in trainval_idx]
     gss = GroupShuffleSplit(n_splits=1, test_size=val_split, random_state=seed)
     tr_rel, val_rel = next(gss.split(range(len(trainval_idx)), tgt, sub))
     return [trainval_idx[i] for i in tr_rel], [trainval_idx[i] for i in val_rel]
@@ -122,23 +118,14 @@ def _loaders(cfg: Config, train_base, eval_base, train_idx, val_idx, test_idx):
     return train_loader, val_loader, test_loader
 
 
-def build_dataloaders(cfg: Config):
-    """Jedan subject-wise split -> train/val/test loaderi + imena klasa."""
-    train_base, eval_base = _bases(cfg)
-    subjects = _subjects(train_base)
-    train_idx, val_idx, test_idx = subject_split(
-        train_base.targets, subjects, cfg.val_split, cfg.test_split, cfg.seed)
-    return (*_loaders(cfg, train_base, eval_base, train_idx, val_idx, test_idx),
-            train_base.classes)
-
-
 def build_fold_dataloaders(cfg: Config, fold: int):
     """Za dati fold: test = osobe tog folda; train/val (nested) iz ostalih osoba."""
     train_base, eval_base = _bases(cfg)
     subjects = _subjects(train_base)
-    trainval_idx, test_idx = cv_folds(train_base.targets, subjects, cfg.n_folds, cfg.seed)[fold]
+    trainval_idx, test_idx = cv_folds(train_base.targets, subjects, cfg.n_folds,
+                                      cfg.seed, cfg.leaky_split)[fold]
     train_idx, val_idx = _val_from_trainval(
-        trainval_idx, train_base.targets, subjects, cfg.val_split, cfg.seed)
+        trainval_idx, train_base.targets, subjects, cfg.val_split, cfg.seed, cfg.leaky_split)
     return (*_loaders(cfg, train_base, eval_base, train_idx, val_idx, test_idx),
             train_base.classes)
 

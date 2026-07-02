@@ -44,10 +44,3 @@ def save_json(data: dict, path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
-
-
-def save_checkpoint(model: torch.nn.Module, path, **extra) -> None:
-    """Sacuvaj tezine modela i eventualne dodatne podatke."""
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save({"model_state": model.state_dict(), **extra}, path)

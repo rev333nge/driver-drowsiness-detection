@@ -19,6 +19,8 @@ data_eyes/
 
 # Training artifacts (checkpoints, metrics, plots)
 outputs/
+outputs_leaky/
+outputs_test/
 *.pt
 *.pth
 
