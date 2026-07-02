@@ -21,6 +21,7 @@ class Config:
     val_split: float = 0.15
     test_split: float = 0.15
     n_folds: int = 5                  # GroupKFold po osobi (subject-wise CV)
+    leaky_split: bool = False         # per-image podela (DEMO curenja, ne za rezultate)
     batch_size: int = 64
     num_workers: int = 8
 
@@ -92,6 +93,9 @@ def build_config(argv=None) -> Config:
     parser.add_argument("--batch-size", dest="batch_size", type=int)
     parser.add_argument("--num-workers", dest="num_workers", type=int)
     parser.add_argument("--n-folds", dest="n_folds", type=int)
+    parser.add_argument("--leaky-split", dest="leaky_split",
+                        action="store_true", default=None,
+                        help="Per-image podela umesto subject-wise (pokazuje curenje).")
     parser.add_argument("--epochs", type=int)
     parser.add_argument("--lr", type=float)
     parser.add_argument("--weight-decay", dest="weight_decay", type=float)
