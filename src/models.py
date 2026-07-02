@@ -27,6 +27,12 @@ def _set_requires_grad(module, value):
         p.requires_grad = value
 
 
+# Napomena: zamrzavamo samo tezine (requires_grad=False). BatchNorm running
+# statistike su bufferi, ne parametri, pa se i dalje azuriraju dok je model u
+# train() modu - "frozen" backbone tako dobija blagu BN adaptaciju na nas
+# dataset. Ostavljeno namerno (standardno, cesto i korisno).
+
+
 def _build_mobilenet(cfg: Config):
     net = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1)
     in_features = net.last_channel  # 1280

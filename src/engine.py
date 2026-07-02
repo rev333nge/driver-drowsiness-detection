@@ -3,19 +3,24 @@
 from __future__ import annotations
 
 import torch
+from torch.amp import autocast
 
 
-def train_one_epoch(model, loader, criterion, optimizer, device):
-    """Jedna epoha treninga; vraca (prosecan_loss, tacnost)."""
+def train_one_epoch(model, loader, criterion, optimizer, device, scaler):
+    """Jedna epoha treninga (uz mixed precision); vraca (prosecan_loss, tacnost)."""
     model.train()
     total_loss, correct, n = 0.0, 0, 0
     for images, labels in loader:
         images, labels = images.to(device), labels.to(device)
         optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+        # autocast racuna forward u fp16 gde je bezbedno; scaler cuva gradijente
+        # od potkoracenja. Kad je scaler iskljucen (CPU), sve ostaje fp32.
+        with autocast(device_type=device.type, enabled=scaler.is_enabled()):
+            outputs = model(images)
+            loss = criterion(outputs, labels)
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
 
         total_loss += loss.item() * images.size(0)
         correct += (outputs.argmax(1) == labels).sum().item()

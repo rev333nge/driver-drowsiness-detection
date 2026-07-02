@@ -22,7 +22,10 @@ def main():
     cfg = build_config()
     set_seed(cfg.seed)
     device = get_device(cfg.device)
-    print(f"Eksperiment: {cfg.experiment_name} | uredjaj: {device}")
+    use_amp = device.type == "cuda"
+    # Fiksni ulaz 224x224 -> cuDNN moze da izabere i kesira najbrze konvolucije.
+    torch.backends.cudnn.benchmark = True
+    print(f"Eksperiment: {cfg.experiment_name} | uredjaj: {device} | AMP: {use_amp}")
 
     # Test skup se ne dira ovde - cuva se za evaluaciju (Faza 5).
     train_loader, val_loader, _, classes = build_dataloaders(cfg)
@@ -31,6 +34,7 @@ def main():
     criterion = nn.CrossEntropyLoss()
     trainable = [p for p in model.parameters() if p.requires_grad]
     optimizer = torch.optim.Adam(trainable, lr=cfg.lr, weight_decay=cfg.weight_decay)
+    scaler = torch.amp.GradScaler("cuda", enabled=use_amp)
     stopper = EarlyStopping(cfg.early_stopping_patience)
 
     out_dir = cfg.experiment_dir
@@ -39,7 +43,7 @@ def main():
 
     for epoch in range(1, cfg.epochs + 1):
         t0 = time.time()
-        tr_loss, tr_acc = train_one_epoch(model, train_loader, criterion, optimizer, device)
+        tr_loss, tr_acc = train_one_epoch(model, train_loader, criterion, optimizer, device, scaler)
         va_loss, va_acc = evaluate(model, val_loader, criterion, device)
         dt = time.time() - t0
 
