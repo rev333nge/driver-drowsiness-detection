@@ -33,7 +33,7 @@ class Config:
     epochs: int = 30
     lr: float = 1e-3
     weight_decay: float = 0.0
-    early_stopping_patience: int = 3
+    early_stopping_patience: int = 5
 
     # augmentacija
     horizontal_flip: bool = True
