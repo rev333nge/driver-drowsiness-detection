@@ -21,7 +21,7 @@ class Config:
     val_split: float = 0.15
     test_split: float = 0.15
     batch_size: int = 64
-    num_workers: int = 4
+    num_workers: int = 8
 
     # glava klasifikatora (in -> hidden_dim -> num_classes)
     hidden_dim: int = 256

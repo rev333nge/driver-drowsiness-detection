@@ -56,3 +56,30 @@ def plot_sample_images(data_dir, class_names, save_path, per_class=8, seed=42):
     fig.savefig(save_path, dpi=150)
     plt.close(fig)
     return save_path
+
+
+def plot_training_curves(history, save_path):
+    """Krive gubitka i tacnosti kroz epohe (train vs val)."""
+    save_path = Path(save_path)
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    epochs = [h["epoch"] for h in history]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4))
+    ax1.plot(epochs, [h["train_loss"] for h in history], marker="o", label="train")
+    ax1.plot(epochs, [h["val_loss"] for h in history], marker="o", label="val")
+    ax1.set_xlabel("epoha")
+    ax1.set_ylabel("gubitak")
+    ax1.set_title("Gubitak")
+    ax1.legend()
+
+    ax2.plot(epochs, [h["train_acc"] for h in history], marker="o", label="train")
+    ax2.plot(epochs, [h["val_acc"] for h in history], marker="o", label="val")
+    ax2.set_xlabel("epoha")
+    ax2.set_ylabel("tacnost")
+    ax2.set_title("Tacnost")
+    ax2.legend()
+
+    fig.tight_layout()
+    fig.savefig(save_path, dpi=150)
+    plt.close(fig)
+    return save_path
