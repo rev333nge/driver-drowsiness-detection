@@ -60,8 +60,10 @@ def build_dataloaders(cfg: Config):
     train_idx, val_idx, test_idx = stratified_split(
         train_base.targets, cfg.val_split, cfg.test_split, cfg.seed)
 
-    common = dict(batch_size=cfg.batch_size,
-                  num_workers=cfg.num_workers, pin_memory=True)
+    # persistent_workers izbegava ponovno pokretanje procesa svake epohe
+    # (bitno na Windows-u gde je spawn skup).
+    common = dict(batch_size=cfg.batch_size, num_workers=cfg.num_workers,
+                  pin_memory=True, persistent_workers=cfg.num_workers > 0)
     train_loader = DataLoader(Subset(train_base, train_idx), shuffle=True, **common)
     val_loader = DataLoader(Subset(eval_base, val_idx), shuffle=False, **common)
     test_loader = DataLoader(Subset(eval_base, test_idx), shuffle=False, **common)
