@@ -1,0 +1,26 @@
+[
+  {
+    "pokusaj": "Baseline (celo lice)",
+    "test_acc_mean": 0.6055,
+    "test_acc_std": 0.0691,
+    "izvor": "outputs/mobilenet_finetune/cv_results.json"
+  },
+  {
+    "pokusaj": "+ weight_decay + dropout",
+    "test_acc_mean": 0.6049,
+    "test_acc_std": 0.0729,
+    "izvor": "outputs/mobilenet_finetune/2026-07-02_21-41-06/cv_results.json"
+  },
+  {
+    "pokusaj": "+ jaka augmentacija",
+    "test_acc_mean": 0.5669,
+    "test_acc_std": 0.0965,
+    "izvor": "outputs/mobilenet_finetune/2026-07-02_22-09-32/cv_results.json"
+  },
+  {
+    "pokusaj": "Eye-ROI + grayscale + aug",
+    "test_acc_mean": 0.5773,
+    "test_acc_std": 0.1,
+    "izvor": "outputs/mobilenet_finetune/2026-07-02_22-58-16/cv_results.json"
+  }
+]

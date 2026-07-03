@@ -1,0 +1,21 @@
+# CPU-only zavisnosti: radi na BILO KOM laptopu (bez NVIDIA kartice).
+# Dovoljno za webcam demo (i za CPU trening). Ako imas NVIDIA GPU -> requirements.txt.
+# Verzije nezakucane namerno, da pip izabere wheel za tvoju verziju Pythona.
+# torch sa PyPI je vec CPU build, pa nije potreban poseban index.
+
+torch
+torchvision
+
+# potrebno pri pokretanju (torch inferencija, kamera, transformacije)
+numpy
+scikit-learn
+opencv-python
+pillow
+PyYAML
+
+# samo za grafike / EDA / tabele / notebook (nije nuzno za sam demo)
+matplotlib
+seaborn
+tqdm
+pandas
+jupyter
