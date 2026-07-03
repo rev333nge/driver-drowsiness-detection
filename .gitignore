@@ -23,6 +23,8 @@ outputs_leaky/
 outputs_test/
 *.pt
 *.pth
+# izuzetak: demo model se isporucuje u repo-u da webcam radi odmah posle git clone
+!assets/final_mobilenet_finetune.pt
 
 # Notebooks
 .ipynb_checkpoints/

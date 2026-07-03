@@ -74,11 +74,12 @@ python -m src.train --config configs/resnet_finetune.yaml   # jedan eksperiment
 python -m src.evaluate                                      # uporedna tabela
 ```
 
-Real-time demo:
+Real-time demo (istrenirani mobilenet model vec dolazi u `assets/`, radi odmah posle clone-a):
 
 ```
-python -m src.train_final --config configs/mobilenet_finetune.yaml   # snimi model
-python -m src.webcam --model outputs/final_mobilenet_finetune.pt      # kamera (izlaz: 'q')
+python -m src.webcam --model assets/final_mobilenet_finetune.pt   # kamera (izlaz: 'q')
 ```
+
+Za treniranje sopstvenog modela: `python -m src.train_final --config configs/mobilenet_finetune.yaml` (snima u `outputs/`).
 
 Izvestaj: otvori `report.ipynb` u Jupyter-u ili VS Code i uradi **Run All**.
