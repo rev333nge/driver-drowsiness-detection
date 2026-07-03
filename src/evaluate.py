@@ -10,6 +10,7 @@ Pokretanje (posle treninga):
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path
 
@@ -71,14 +72,27 @@ def _latest_runs(out):
 
 
 def main():
-    cfg = build_config()
-    device = get_device(cfg.device)
-    out = Path(cfg.output_dir)
+    ap = argparse.ArgumentParser(description="Evaluacija CV rezultata + uporedna tabela.")
+    ap.add_argument("--output-dir", default="outputs",
+                    help="Gde su rezultati i gde ide comparison.json.")
+    ap.add_argument("--runs", nargs="+", default=None,
+                    help="Konkretni folderi sa cv_results.json (umesto auto-izbora najnovijih).")
+    ap.add_argument("--device", choices=["cuda", "cpu"], default="cuda")
+    args = ap.parse_args()
 
-    exps = _latest_runs(out)
-    if not exps:
-        print(f"Nema cv_results.json u {out}/. Pokreni trening prvo (run_all.ps1).")
-        return
+    device = get_device(args.device)
+    out = Path(args.output_dir)
+    if args.runs:
+        exps = [Path(r) for r in args.runs]
+        missing = [str(p) for p in exps if not (p / "cv_results.json").exists()]
+        if missing:
+            print(f"Nema cv_results.json u: {missing}")
+            return
+    else:
+        exps = _latest_runs(out)
+        if not exps:
+            print(f"Nema cv_results.json u {out}/. Pokreni trening prvo (run_all.ps1).")
+            return
 
     results = [_evaluate_experiment(d, device) for d in exps]
 
