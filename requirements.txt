@@ -16,3 +16,7 @@ opencv-python
 # Config parsing & progress bars
 PyYAML
 tqdm
+
+# Izvestaj (Jupyter notebook: report.ipynb)
+pandas
+jupyter

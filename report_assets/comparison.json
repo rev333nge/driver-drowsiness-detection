@@ -1,0 +1,58 @@
+[
+  {
+    "experiment": "mobilenet_frozen",
+    "accuracy": 0.5653,
+    "precision_drowsy": 0.5816,
+    "recall_drowsy": 0.6664,
+    "f1_drowsy": 0.6211,
+    "test_acc_mean": 0.5676,
+    "test_acc_std": 0.1051,
+    "avg_epoch_s": 20.4,
+    "total_params": 2552322,
+    "trainable_params": 328450,
+    "size_mb": 9.87,
+    "fps": 305.8
+  },
+  {
+    "experiment": "mobilenet_finetune",
+    "accuracy": 0.6035,
+    "precision_drowsy": 0.6128,
+    "recall_drowsy": 0.7021,
+    "f1_drowsy": 0.6544,
+    "test_acc_mean": 0.6055,
+    "test_acc_std": 0.0691,
+    "avg_epoch_s": 19.9,
+    "total_params": 2552322,
+    "trainable_params": 1214530,
+    "size_mb": 9.87,
+    "fps": 275.9
+  },
+  {
+    "experiment": "resnet_frozen",
+    "accuracy": 0.5959,
+    "precision_drowsy": 0.5924,
+    "recall_drowsy": 0.7829,
+    "f1_drowsy": 0.6745,
+    "test_acc_mean": 0.5924,
+    "test_acc_std": 0.0775,
+    "avg_epoch_s": 33.7,
+    "total_params": 24033090,
+    "trainable_params": 525058,
+    "size_mb": 91.88,
+    "fps": 274.0
+  },
+  {
+    "experiment": "resnet_finetune",
+    "accuracy": 0.6476,
+    "precision_drowsy": 0.6796,
+    "recall_drowsy": 0.6451,
+    "f1_drowsy": 0.6619,
+    "test_acc_mean": 0.6463,
+    "test_acc_std": 0.0658,
+    "avg_epoch_s": 38.5,
+    "total_params": 24033090,
+    "trainable_params": 15489794,
+    "size_mb": 91.88,
+    "fps": 240.5
+  }
+]

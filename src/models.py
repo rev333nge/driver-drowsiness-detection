@@ -27,6 +27,13 @@ def _set_requires_grad(module, value):
         p.requires_grad = value
 
 
+def _unfreeze_count(cfg: Config, default_finetune):
+    """Koliko zadnjih blokova odmrznuti: eksplicitni cfg.unfreeze_blocks ili po modu."""
+    if cfg.unfreeze_blocks is not None:
+        return cfg.unfreeze_blocks
+    return default_finetune if cfg.mode == "finetune" else 0
+
+
 # Napomena: zamrzavamo samo tezine (requires_grad=False). BatchNorm running
 # statistike su bufferi, ne parametri, pa se i dalje azuriraju dok je model u
 # train() modu - "frozen" backbone tako dobija blagu BN adaptaciju na nas
@@ -37,8 +44,9 @@ def _build_mobilenet(cfg: Config):
     net = models.mobilenet_v2(weights=models.MobileNet_V2_Weights.IMAGENET1K_V1)
     in_features = net.last_channel  # 1280
     _set_requires_grad(net.features, False)
-    if cfg.mode == "finetune":
-        _set_requires_grad(net.features[-2:], True)  # poslednja dva bloka
+    n = _unfreeze_count(cfg, default_finetune=2)  # finetune podrazumevano zadnja 2 bloka
+    if n > 0:
+        _set_requires_grad(net.features[-n:], True)
     net.classifier = _make_head(in_features, cfg.hidden_dim, cfg.num_classes, cfg.dropout)
     return net
 
@@ -47,8 +55,10 @@ def _build_resnet(cfg: Config):
     net = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V1)
     in_features = net.fc.in_features  # 2048
     _set_requires_grad(net, False)
-    if cfg.mode == "finetune":
-        _set_requires_grad(net.layer4, True)  # poslednji rezidualni blok
+    n = _unfreeze_count(cfg, default_finetune=1)  # finetune podrazumevano layer4
+    if n > 0:
+        for block in [net.layer1, net.layer2, net.layer3, net.layer4][-n:]:
+            _set_requires_grad(block, True)
     net.fc = _make_head(in_features, cfg.hidden_dim, cfg.num_classes, cfg.dropout)
     return net
 

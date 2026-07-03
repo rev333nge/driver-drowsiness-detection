@@ -14,6 +14,7 @@ class Config:
     # identitet eksperimenta
     model: str = "mobilenet"          # mobilenet | resnet
     mode: str = "frozen"              # frozen | finetune
+    unfreeze_blocks: int = None       # None = po modu; inace odmrzni zadnjih N blokova
 
     # podaci
     data_dir: str = "data"
@@ -88,6 +89,8 @@ def build_config(argv=None) -> Config:
                         help="Putanja do YAML config fajla (vidi configs/).")
     parser.add_argument("--model", choices=["mobilenet", "resnet"])
     parser.add_argument("--mode", choices=["frozen", "finetune"])
+    parser.add_argument("--unfreeze", dest="unfreeze_blocks", type=int,
+                        help="Odmrzni zadnjih N blokova backbone-a (gazi podrazumevano po modu).")
     parser.add_argument("--data-dir", dest="data_dir")
     parser.add_argument("--image-size", dest="image_size", type=int)
     parser.add_argument("--batch-size", dest="batch_size", type=int)
