@@ -50,6 +50,8 @@ def main():
     ap.add_argument("--smooth", type=int, default=15, help="Broj frejmova za uglacavanje.")
     ap.add_argument("--threshold", type=float, default=0.5, help="Prag za klasu Drowsy.")
     ap.add_argument("--device", choices=["cuda", "cpu"], default=None)
+    ap.add_argument("--debug", action="store_true",
+                    help="Prikazi crop koji ide u model (dijagnostika blizu/daleko).")
     args = ap.parse_args()
 
     ckpt = torch.load(args.model, map_location="cpu", weights_only=False)
@@ -87,6 +89,11 @@ def main():
         if box is not None:
             x0, y0, x1, y1 = box
             rgb = cv2.cvtColor(frame[y0:y1, x0:x1], cv2.COLOR_BGR2RGB)
+            if args.debug:  # prikazi tacno ono sto model spatijalno vidi (posle resize-a)
+                dbg = cv2.resize(frame[y0:y1, x0:x1], (cfg.image_size, cfg.image_size))
+                if cfg.grayscale:
+                    dbg = cv2.cvtColor(cv2.cvtColor(dbg, cv2.COLOR_BGR2GRAY), cv2.COLOR_GRAY2BGR)
+                cv2.imshow("model input (crop)", dbg)
             x = eval_tf(Image.fromarray(rgb)).unsqueeze(0).to(device)
             with torch.no_grad():
                 p = torch.softmax(model(x), 1)[0, drowsy_idx].item()
